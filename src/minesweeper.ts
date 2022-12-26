@@ -87,8 +87,8 @@ export class Minesweeper {
                 this.total_bombs = 40
                 break
             case 'hard':
-                this.rows = 30
-                this.columns = 16
+                this.rows = 16
+                this.columns = 30
                 this.total_bombs = 99
                 break
             default:
@@ -102,7 +102,7 @@ export class Minesweeper {
     }
 
     generateBoard() {
-        console.log('generating')
+        // console.log('generating')
         let bombs_array: number[] = []
         let cells: HTMLElement[] = []
         let index: number = 1
@@ -127,12 +127,12 @@ export class Minesweeper {
 
     addBombs(exclude: number|null = null) {
         return new Promise(resolve => {
-            console.log('adding bombs')
+            // console.log('adding bombs')
             let cells = this.getAllCells()
             let bombs_array: number[] = []
             let is_bomb = false
 
-            console.log(this.total_bombs)
+            // console.log(this.total_bombs)
             
             while(bombs_array.length < this.total_bombs){
                 let random = Math.floor(Math.random() * (this.rows * this.columns)) + 1
@@ -245,6 +245,10 @@ export class Minesweeper {
         if(clicked_cell.dataset.isChecked === '1') return
         clicked_cell.dataset.isChecked = '1'
 
+        if(clicked_cell.dataset.flagged == 'true') {
+            this.updateFlagCounter('up')
+        }
+
         let x = parseInt(clicked_cell.dataset.x)
         let y = parseInt(clicked_cell.dataset.y)
         let is_bomb = parseInt(clicked_cell.dataset.isBomb) ? true : false
@@ -264,16 +268,13 @@ export class Minesweeper {
         if(clicked_cell.dataset.closeBombs === '0') {
             for(let cell of neighbour_cells) {
                 clicked_cell.dataset.isChecked = '1'
-                // @ts-ignore
                 let x = cell.dataset.x
-                // @ts-ignore
                 let y = cell.dataset.y
                 cell.classList.add('safe')
                 this.leftClick(this.getCellByXY(x, y))
             }
         } else {
             for(let cell of direct_neighbour_cells) {
-                // @ts-ignore
                 if(cell.dataset.closeBombs === '0') {
                     clicked_cell.dataset.isChecked = '1'
                 }
@@ -282,7 +283,7 @@ export class Minesweeper {
     }
 
     rightClick(cell: any): void {
-        console.log('right click')
+        if(cell.dataset.isChecked == '1') return
         if(!cell.dataset.flagged || cell.dataset.flagged == 'false') {
             // remove a flag from this cell
             cell.dataset.flagged = 'true'
@@ -295,7 +296,7 @@ export class Minesweeper {
     }
 
     async firstClick(cell: any) {
-        console.log('first click!')
+        // console.log('first click!')
         this.setDifficulty(null)
         await this.addBombs(cell.dataset.index)
         await this.scanBoard()

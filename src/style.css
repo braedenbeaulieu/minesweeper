@@ -33,6 +33,14 @@ h2 {
 	text-align: center;
 }
 
+.difficulty-selector {
+	display: flex;
+	justify-content: center;
+	gap: 15px;
+	margin-top: 15px;	
+	margin-bottom: 15px;	
+}
+
 #board {
 	margin: 40px auto;
 	border: 1px solid black;
