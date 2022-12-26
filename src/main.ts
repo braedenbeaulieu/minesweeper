@@ -1,9 +1,10 @@
 import './style.css'
-import { Board } from './board'
-import { Cell } from './cell'
+import { Minesweeper } from './minesweeper'
 
-let board = new Board({
-  x: 30,
-  y: 40,
-  
+let board = new Minesweeper({
+    container: document.getElementById('app'),
+	total_bombs: 40
 })
+
+
+board.render()
