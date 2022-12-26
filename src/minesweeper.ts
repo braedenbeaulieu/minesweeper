@@ -2,11 +2,13 @@ export class Minesweeper {
     container: HTMLElement|null
     total_bombs: number
     board: HTMLElement|null
+    first_click: boolean
 
     constructor(options: BoardOptions) {
         this.container = options.container
         this.total_bombs = options.total_bombs
         this.board = null
+        this.first_click = true
 
         this.container?.addEventListener('contextmenu', (e) => {
             e.preventDefault()
@@ -15,7 +17,7 @@ export class Minesweeper {
         this.initEventListeners()
     }
 
-    createCell(x: number, y: number , is_bomb: boolean): HTMLElement {
+    createCell(x: number, y: number , is_bomb: boolean, index: string): HTMLElement {
         let cell = document.createElement('div')
 
         //check neighbouring cells and count them
@@ -25,8 +27,13 @@ export class Minesweeper {
         cell.dataset.y = y.toString()
         cell.dataset.isBomb = is_bomb ? '1' : '0'
         cell.dataset.isChecked = '0'
+        cell.dataset.index = index
 
         return cell
+    }
+
+    getAllCells(): any[] {
+        return Array.from(this.getBoard().querySelectorAll(`.cell`))
     }
 
     getCellByXY(x: number, y: number) {
@@ -49,9 +56,9 @@ export class Minesweeper {
     }
 
     generateBoard() {
+        console.log('generating')
         let bombs_array: number[] = []
         let is_bomb = false
-
         
         while(bombs_array.length < this.total_bombs){
             let random = Math.floor(Math.random() * (256)) + 1
@@ -61,37 +68,67 @@ export class Minesweeper {
         let cells: HTMLElement[] = []
         let x = 16
         let y = 16
+        let index = 1
 
         for(let i = 0; i < x; i++) {
             for(let j = 0; j < y; j++) {
-                let sum = cells.length + 1
-                is_bomb = (bombs_array.indexOf(sum) > -1) ? true : false
-                let cell = this.createCell(i, j, is_bomb)
+                is_bomb = false
+                let cell = this.createCell(i, j, is_bomb, index.toString())
                 this.appendCell(cell)
                 cells.push(cell)
+                index++
             }
         }
     }
 
-    scanBoard() {
-        console.log('scanning')
-        let x = 16
-        let y = 16
-
-        for(let i = 0; i < x; i++) {
-            for(let j = 0; j < y; j++) {
-                let cell = this.getCellByXY(i, j)
-                if(!cell) continue
-
-                let { close_bombs } = this.checkNeighbourCellsForBombs(i, j)
-                if(close_bombs > 0) {
-                    // @ts-ignore
-                    cell.innerHTML = `<p>${close_bombs}</p>`
-                }
-                // @ts-ignore
-                cell.dataset.closeBombs = close_bombs
+    addBombs(exclude: number|null = null) {
+        return new Promise(resolve => {
+            console.log('adding bombs')
+            let cells = this.getAllCells()
+            let bombs_array: number[] = []
+            let is_bomb = false
+            
+            while(bombs_array.length < this.total_bombs){
+                let random = Math.floor(Math.random() * (256)) + 1
+                if(bombs_array.indexOf(random) === -1 && random != exclude) bombs_array.push(random)
             }
-        }
+    
+            for(let cell of cells) {
+                is_bomb = (bombs_array.indexOf(parseInt(cell.dataset.index)) > -1) ? true : false
+                
+                if(is_bomb) {
+                    console.log('index' + cell.dataset.index, is_bomb)
+                    cell.dataset.isBomb = '1'
+                }
+            }
+
+            resolve(true)
+        })
+    }
+
+    scanBoard() {
+        return new Promise(resolve => {
+            console.log('scanning')
+            let x = 16
+            let y = 16
+    
+            for(let i = 0; i < x; i++) {
+                for(let j = 0; j < y; j++) {
+                    let cell = this.getCellByXY(i, j)
+                    if(!cell) continue
+    
+                    let { close_bombs } = this.checkNeighbourCellsForBombs(i, j)
+                    if(close_bombs > 0) {
+                        // @ts-ignore
+                        cell.innerHTML = `<p>${close_bombs}</p>`
+                    }
+                    // @ts-ignore
+                    cell.dataset.closeBombs = close_bombs
+                }
+            }
+
+            resolve(true)
+        })
     }
 
     resetBoard() {
@@ -108,9 +145,7 @@ export class Minesweeper {
     render() {
         let board = this.getBoard()
         this.container?.append(board)
-
         this.generateBoard()
-        this.scanBoard()
     }
 
     checkNeighbourCellsForBombs(current_x: number, current_y: number): checkNeighbourCellsForBombsReturn {
@@ -217,9 +252,11 @@ export class Minesweeper {
         }
     }
 
-    firstClick(cell: any) {
+    async firstClick(cell: any) {
         console.log('first click!')
-        console.log(cell)
+        await this.addBombs(cell.dataset.index)
+        await this.scanBoard()
+        this.leftClick(cell)
     }
 
     loseGame() {
@@ -252,7 +289,6 @@ export class Minesweeper {
 
     initEventListeners() {
         let board = this.getBoard()
-        let first_click = true
 
         board.addEventListener('mousedown', (e): void => {
             e.preventDefault()
@@ -262,9 +298,9 @@ export class Minesweeper {
             // @ts-ignore
             if(!target.classList.contains('cell')) return
 
-            if(first_click) {
+            if(this.first_click) {
                 this.firstClick(target)
-                first_click = false
+                this.first_click = false
             } else {
                 if(e.button === 2 || (e.button === 0 && e.altKey === true)) {
                     this.rightClick(target)
