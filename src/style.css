@@ -16,7 +16,7 @@
 }
 
 .container {
-  	max-width: 800px;
+  	max-width: 1050px;
 	width: 100%;
 	padding: 0 15px;
 	margin: 0 auto;
@@ -34,14 +34,21 @@ h2 {
 }
 
 #board {
-	width: 535px;
-	/* width: 423px; */
-	/* height: 415px; */
 	margin: 40px auto;
 	border: 1px solid black;
 	display: flex;
 	flex-wrap: wrap;
 	gap: 1.5px;
+}
+
+#board.easy {
+	width: 334px;
+}
+#board.normal {
+	width: 535px;
+}
+#board.hard {
+	width: 1004px;
 }
 
 .cell {

@@ -8,12 +8,6 @@ declare global {
         is_bomb: boolean
     }
 
-    interface BoardOptions {
-        container: HTMLElement|null
-        total_bombs: number
-        // cells: Cell[]
-    }
-
     interface checkNeighbourCellsForBombsReturn {
         close_bombs: number,
         neighbour_cells: any[]
