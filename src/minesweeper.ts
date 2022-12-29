@@ -261,6 +261,10 @@ export class Minesweeper {
             }, 20)
         } else {
             clicked_cell.classList.add('safe')
+            if(clicked_cell.dataset.flagged == 'true') {
+                clicked_cell.dataset.flagged = 'false'
+                // this.updateFlagCounter('up')
+            }
         }
 
         let { neighbour_cells, direct_neighbour_cells } = this.checkNeighbourCellsForBombs(x, y)
@@ -271,6 +275,10 @@ export class Minesweeper {
                 let x = cell.dataset.x
                 let y = cell.dataset.y
                 cell.classList.add('safe')
+                if(cell.dataset.flagged == 'true') {
+                    cell.dataset.flagged = 'false'
+                    // this.updateFlagCounter('up')
+                }
                 this.leftClick(this.getCellByXY(x, y))
             }
         } else {
@@ -285,11 +293,9 @@ export class Minesweeper {
     rightClick(cell: any): void {
         if(cell.dataset.isChecked == '1') return
         if(!cell.dataset.flagged || cell.dataset.flagged == 'false') {
-            // remove a flag from this cell
             cell.dataset.flagged = 'true'
             this.updateFlagCounter('down')
         } else if(cell.dataset.flagged == 'true') {
-            // add a flag to this cell
             cell.dataset.flagged = 'false'
             this.updateFlagCounter('up')
         }
