@@ -232,14 +232,25 @@ export class Minesweeper {
     }
 
     isEveryCellChecked(): boolean {
-        if((document.querySelectorAll('.cell[data-is-checked="0"]').length) - 1 == 0) return true
+        // if every square - number of bombs is equal to the number of checked cells
+        if((document.querySelectorAll('.cell[data-is-checked="1"][data-is-bomb="0"]').length + 1) + this.total_bombs == (this.rows * this.columns)) {
+            return true
+        } 
         return false
     }
 
+    showAllBombs(): void {
+        let bombs = Array.from(document.querySelectorAll('.cell[data-is-bomb="1"]'))
+
+        for(let bomb of bombs) {
+            bomb.classList.add('boom')
+        }
+    }
+
     leftClick(clicked_cell: any): void {
-        // if(this.isEveryCellChecked()) {
-        //     this.winGame()
-        // }
+        if(this.isEveryCellChecked()) {
+            this.winGame()
+        }
 
         if(!clicked_cell) return
         if(clicked_cell.dataset.isChecked === '1') return
@@ -310,11 +321,14 @@ export class Minesweeper {
     }
 
     loseGame() {
-        alert('You lose!')
-        this.resetBoard()
+        this.showAllBombs()
+        setTimeout(() => {
+            alert('You lose!')
+            this.resetBoard()
+        }, 5)
     }
     winGame() {
-        alert('You Win!!')
+        // alert('You Win!!')
         this.resetBoard()
     }
 
